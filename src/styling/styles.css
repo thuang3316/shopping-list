@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+@layer components {
+    .page-header {
+        @apply flex justify-center items-center font-mono font-extrabold
+    }
+}
