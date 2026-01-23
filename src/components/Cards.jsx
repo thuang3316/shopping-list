@@ -31,7 +31,6 @@ export function Card({product, setCards}) {
             className='flex flex-col items-center p-6 bg-white rounded-xl border border-gray-100 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 gap-4' 
             key={product.id}
         >
-            {/* Image Container with subtle background for better product isolation */}
             <div className='w-64 h-72 p-6 bg-gray-50 rounded-lg flex items-center justify-center'> 
                 <img 
                     src={product.image} 
@@ -40,7 +39,6 @@ export function Card({product, setCards}) {
                 />
             </div>
 
-            {/* Text Content */}
             <div className="flex flex-col gap-1 items-center px-2">
                 <h3 className="text-sm font-medium text-gray-700 line-clamp-2 h-10 text-center">
                     {product.title}
@@ -50,7 +48,6 @@ export function Card({product, setCards}) {
                 </span>
             </div>
 
-            {/* Actions - Keeping your original button logic & styling */}
             <div className='flex gap-4 mt-auto'>
                 {product.count > 0 ? (
                     <div className='flex items-center gap-6 rounded-full border-2 border-amber-300 px-5 py-2 bg-white shadow-sm'>

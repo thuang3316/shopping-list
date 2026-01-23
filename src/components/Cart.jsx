@@ -38,9 +38,7 @@ export function Cart({cards, setCards}) {
         </h1>
 
         {cartItems.length > 0 ? (
-            /* CASE 1: CART HAS ITEMS */
             <div className="flex flex-col lg:flex-row justify-center gap-8 items-start">
-                {/* ITEM LIST */}
                 <ul className="flex flex-col gap-6 w-full lg:w-2/3">
                     {cartItems.map(item => (
                         <div 
@@ -76,7 +74,6 @@ export function Cart({cards, setCards}) {
                     ))}
                 </ul>
 
-                {/* SIDEBAR - Only rendered when items exist */}
                 <div id="sidebar" className="w-full lg:w-1/3 sticky top-24 bg-amber-50 border-2 border-amber-200 p-8 rounded-[2.5rem] shadow-sm flex flex-col gap-6">
                     <h2 className="text-xl font-black text-amber-950 uppercase italic">Order Summary</h2>
                     <div className="space-y-3 border-b-2 border-amber-200 pb-6 font-bold text-amber-900/70">
@@ -99,7 +96,6 @@ export function Cart({cards, setCards}) {
                 </div>
             </div>
         ) : (
-            /* CASE 2: CART IS EMPTY */
             <div className="flex flex-col items-center justify-center py-20 px-4 bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
                 <div className="bg-amber-100 p-6 rounded-full mb-6 text-4xl">🛒</div>
                 <h2 className="text-2xl font-black text-gray-800 mb-2">Your cart is feeling light...</h2>
