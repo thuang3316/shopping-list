@@ -5,3 +5,7 @@
         @apply flex justify-center items-center font-mono font-extrabold
     }
 }
+
+:root {
+    margin: 20px;
+}
