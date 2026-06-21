@@ -4,6 +4,7 @@ import { Nav } from './Nav.jsx';
 import { Home } from '../routes/Home.jsx';
 import { Login } from '../routes/Login.jsx';
 import { Signup } from '../routes/Signup.jsx';
+import { Create } from '../routes/Create.jsx';
 import { NotFound } from '../routes/NotFound.jsx';
 
 export function App() {
@@ -16,6 +17,7 @@ export function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/create" element={<Create />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
