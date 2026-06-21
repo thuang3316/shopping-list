@@ -4,7 +4,8 @@ import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { sql } from './db.js';
 
-const DEMO = { username: 'demo', email: 'demo@swap.test', phone: '555-0100', password: 'password123' };
+// Strong, non-breached demo password (avoids Chrome's leaked-password warning).
+const DEMO = { username: 'demo', email: 'demo@swap.test', phone: '555-0100', password: 'swap-demo-2026!' };
 
 const ITEMS = [
   { title: 'Cannondale road bike, 56cm',     category: 'bikes',       price: 120,  description: 'Light alloy frame, recently serviced. Rides great.' },
