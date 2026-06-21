@@ -5,6 +5,7 @@ import { Home } from '../routes/Home.jsx';
 import { Login } from '../routes/Login.jsx';
 import { Signup } from '../routes/Signup.jsx';
 import { Create } from '../routes/Create.jsx';
+import { Item } from '../routes/Item.jsx';
 import { NotFound } from '../routes/NotFound.jsx';
 
 export function App() {
@@ -18,6 +19,7 @@ export function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/create" element={<Create />} />
+            <Route path="/item/:id" element={<Item />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

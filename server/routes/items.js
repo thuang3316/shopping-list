@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { handleUpload } from '@vercel/blob/client';
 import { sql } from '../db.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, optionalAuth } from '../middleware/auth.js';
 
 const router = Router();
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -40,6 +40,34 @@ router.get('/', asyncH(async (req, res) => {
     LIMIT 60`;
   const result = await sql.query(text, params);
   res.json({ items: Array.isArray(result) ? result : result.rows });
+}));
+
+// GET /api/items/:id — single listing. optionalAuth: seller contact (email/
+// phone) is included ONLY for signed-in viewers, to protect private info.
+router.get('/:id', optionalAuth, asyncH(async (req, res) => {
+  const { id } = req.params;
+  if (!/^\d+$/.test(id)) return res.status(404).json({ error: 'Listing not found' });
+
+  const [row] = await sql`
+    SELECT i.id, i.title, i.description, i.price, i.category, i.image_urls, i.status,
+           i.due_date, i.created_at,
+           u.id AS seller_id, u.username AS seller_username, u.email AS seller_email, u.phone AS seller_phone
+    FROM items i JOIN users u ON u.id = i.seller_id
+    WHERE i.id = ${id}`;
+  if (!row) return res.status(404).json({ error: 'Listing not found' });
+
+  const seller = { username: row.seller_username };
+  if (req.user) { seller.email = row.seller_email; seller.phone = row.seller_phone; }
+
+  res.json({
+    item: {
+      id: row.id, title: row.title, description: row.description, price: row.price,
+      category: row.category, image_urls: row.image_urls, status: row.status,
+      due_date: row.due_date, created_at: row.created_at,
+      seller,
+      is_owner: Boolean(req.user) && String(req.user.id) === String(row.seller_id),
+    },
+  });
 }));
 
 // POST /api/items/upload — issues a short-lived token so the browser can upload
