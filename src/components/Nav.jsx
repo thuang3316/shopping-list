@@ -32,8 +32,7 @@ export function Nav() {
         <div className="flex items-center gap-3">
           {loading ? null : user ? (
             <>
-              <Link to="/create" className="btn btn-primary text-sm">List an item</Link>
-              <span className="eyebrow hidden sm:inline">Hi, {user.username}</span>
+              <Link to="/profile" className="eyebrow hidden sm:inline hover:text-grape">Hi, {user.username}</Link>
               <button type="button" className="btn btn-ghost text-sm" onClick={handleLogout}>
                 Sign out
               </button>

@@ -59,7 +59,7 @@
   .btn:active { transform: translateY(1px); }
   .btn-primary { background: var(--color-grape); color: #fff; }
   .btn-primary:hover { background: var(--color-grape-bright); }
-  .btn-ghost { background: transparent; color: var(--color-ink); border: 1.5px solid var(--color-ink); }
+  .btn-ghost { background: var(--color-line); color: var(--color-ink); }
   .btn-ghost:hover { background: var(--color-ink); color: var(--color-paper); }
 
   /* Signature element: the kraft price tag with a punch hole. */

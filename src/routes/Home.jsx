@@ -102,21 +102,29 @@ export function Home() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-5 py-10">
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
-        <div>
-          <span className="eyebrow">Buy &amp; sell secondhand, locally</span>
-          <h1 className="text-4xl mt-2">Browse the board</h1>
-        </div>
-        <div className="flex gap-3">
+    <>
+      {/* Hero — the brand identity, preserved from the Step 0 design. */}
+      <section className="max-w-6xl mx-auto px-5 pt-16 pb-10">
+        <span className="eyebrow">Buy &amp; sell secondhand, locally</span>
+        <h1 className="mt-4 text-5xl sm:text-6xl leading-[0.95] max-w-3xl">
+          One person&rsquo;s clutter is another&rsquo;s<span className="text-grape"> good find.</span>
+        </h1>
+        <p className="mt-5 text-lg text-ink-soft max-w-xl">
+          List what you no longer need, browse what your neighbors are letting go, and message
+          the seller to work out a price. No middleman, no fees.
+        </p>
+        <div className="mt-7 flex gap-3">
           <Link to={user ? '/create' : '/login'} className="btn btn-primary">List an item</Link>
           <Link to={user ? '/make-request' : '/login'} className="btn btn-ghost">Request something</Link>
         </div>
-      </div>
+      </section>
 
-      <FilterBar filters={filters} onChange={onChange} onReset={onReset} />
+      {/* Listings — search/filter/sort + the live grid. */}
+      <section className="max-w-6xl mx-auto px-5 pb-20">
+        <h2 className="text-2xl mb-5">Fresh on the board</h2>
+        <FilterBar filters={filters} onChange={onChange} onReset={onReset} />
 
-      <div className="mt-6">
+        <div className="mt-6">
         {loading ? (
           <p className="eyebrow py-16 text-center">Loading…</p>
         ) : error ? (
@@ -134,7 +142,8 @@ export function Home() {
             </div>
           </>
         )}
-      </div>
-    </div>
+        </div>
+      </section>
+    </>
   );
 }

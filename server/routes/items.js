@@ -121,4 +121,67 @@ router.post('/', requireAuth, asyncH(async (req, res) => {
   res.status(201).json({ id: item.id });
 }));
 
+// PATCH /api/items/:id — update own listing (partial). Ownership enforced in
+// the WHERE clause; 404 (not 403) if not yours, so existence isn't leaked.
+router.patch('/:id', requireAuth, asyncH(async (req, res) => {
+  const { id } = req.params;
+  if (!/^\d+$/.test(id)) return res.status(404).json({ error: 'Listing not found' });
+
+  const sets = [];
+  const params = [];
+  const add = (col, val) => { params.push(val); sets.push(`${col} = $${params.length}`); };
+  const b = req.body || {};
+
+  if (typeof b.title === 'string') {
+    const title = b.title.trim();
+    if (!title) return res.status(400).json({ error: 'Title is required' });
+    if (title.length > 200) return res.status(400).json({ error: 'Title is too long (max 200 characters)' });
+    add('title', title);
+  }
+  if (typeof b.category === 'string') {
+    if (!CATEGORIES.has(b.category)) return res.status(400).json({ error: 'Choose a valid category' });
+    add('category', b.category);
+  }
+  if ('price' in b) {
+    if (b.price === '' || b.price == null) add('price', null);
+    else {
+      const price = Number(b.price);
+      if (!Number.isFinite(price) || price < 0) return res.status(400).json({ error: 'Price must be a positive number' });
+      add('price', price);
+    }
+  }
+  if ('description' in b) add('description', (b.description || '').trim() || null);
+  if ('due_date' in b) {
+    const due = (b.due_date || '').trim() || null;
+    if (due && !/^\d{4}-\d{2}-\d{2}$/.test(due)) return res.status(400).json({ error: 'Invalid due date' });
+    add('due_date', due);
+  }
+  if ('status' in b) {
+    if (!['available', 'sold'].includes(b.status)) return res.status(400).json({ error: 'Invalid status' });
+    add('status', b.status);
+  }
+  if (Array.isArray(b.image_urls)) add('image_urls', b.image_urls.filter((u) => typeof u === 'string').slice(0, 8));
+
+  if (!sets.length) return res.status(400).json({ error: 'Nothing to update' });
+
+  params.push(id);
+  params.push(req.user.id);
+  const text = `UPDATE items SET ${sets.join(', ')}
+                WHERE id = $${params.length - 1} AND seller_id = $${params.length}
+                RETURNING id`;
+  const result = await sql.query(text, params);
+  const rows = Array.isArray(result) ? result : result.rows;
+  if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
+  res.json({ id: rows[0].id });
+}));
+
+// DELETE /api/items/:id — delete own listing.
+router.delete('/:id', requireAuth, asyncH(async (req, res) => {
+  const { id } = req.params;
+  if (!/^\d+$/.test(id)) return res.status(404).json({ error: 'Listing not found' });
+  const rows = await sql`DELETE FROM items WHERE id = ${id} AND seller_id = ${req.user.id} RETURNING id`;
+  if (!rows.length) return res.status(404).json({ error: 'Listing not found' });
+  res.json({ ok: true });
+}));
+
 export default router;
