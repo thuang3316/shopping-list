@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorHandler.js';
 import { sql } from './db.js';
 import authRouter from './routes/auth.js';
+import itemsRouter from './routes/items.js';
 
 // Build the Express app. Exported (not listened) so it can run both as a
 // Vercel serverless handler (api/index.js) and a local dev server (dev.js).
@@ -31,7 +32,8 @@ export function createApp() {
 
   // Feature routers
   app.use('/api/auth', authRouter);
-  // (items, requests mount here as they are built)
+  app.use('/api/items', itemsRouter);
+  // (requests mounts here as it is built)
 
   app.use(errorHandler); // must be last
   return app;

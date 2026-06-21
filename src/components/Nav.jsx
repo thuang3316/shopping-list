@@ -21,14 +21,18 @@ export function Nav() {
         </Link>
 
         <div className="hidden sm:flex items-center gap-7 eyebrow">
-          <NavLink to="/" className={({ isActive }) => isActive ? 'text-grape' : 'hover:text-grape'}>
+          <NavLink to="/" end className={({ isActive }) => isActive ? 'text-grape' : 'hover:text-grape'}>
             Browse
+          </NavLink>
+          <NavLink to="/requests" className={({ isActive }) => isActive ? 'text-grape' : 'hover:text-grape'}>
+            Requests
           </NavLink>
         </div>
 
         <div className="flex items-center gap-3">
           {loading ? null : user ? (
             <>
+              <Link to="/create" className="btn btn-primary text-sm">List an item</Link>
               <span className="eyebrow hidden sm:inline">Hi, {user.username}</span>
               <button type="button" className="btn btn-ghost text-sm" onClick={handleLogout}>
                 Sign out
