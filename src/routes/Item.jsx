@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
 import { PriceTag } from '../components/ItemCard.jsx';
+import { Lightbox } from '../components/Lightbox.jsx';
 import { categoryLabel } from '../lib/categories.js';
 
 function formatDate(iso) {
@@ -15,6 +16,7 @@ export function Item() {
   const { user } = useAuth();
   const [item, setItem] = useState(null);
   const [active, setActive] = useState(0);
+  const [zoom, setZoom] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -48,14 +50,20 @@ export function Item() {
       <Link to="/" className="eyebrow hover:text-grape">← Back to the board</Link>
 
       <div className="mt-5 grid md:grid-cols-2 gap-8 items-start">
-        {/* Gallery */}
+        {/* Gallery — image shows at its natural shape (no crop); click to zoom. */}
         <div>
-          <div className="aspect-square bg-surface border border-line rounded-[var(--radius-card)] grid place-items-center overflow-hidden">
-            {images.length
-              ? <img src={images[active]} alt={item.title} className="w-full h-full object-contain"
-                     fetchPriority="high" decoding="async" />
-              : <span className="font-mono text-sm text-ink-soft/50">no photo</span>}
-          </div>
+          {images.length ? (
+            <button type="button" onClick={() => setZoom(true)} aria-label="Zoom image"
+                    className="block w-full cursor-zoom-in">
+              <img src={images[active]} alt={item.title}
+                   className="mx-auto max-w-full max-h-[75vh] rounded-[var(--radius-card)] border border-line transition-opacity hover:opacity-95"
+                   fetchPriority="high" decoding="async" />
+            </button>
+          ) : (
+            <div className="aspect-[4/3] bg-surface border border-line rounded-[var(--radius-card)] grid place-items-center">
+              <span className="font-mono text-sm text-ink-soft/50">no photo</span>
+            </div>
+          )}
           {images.length > 1 && (
             <div className="flex gap-2 mt-3">
               {images.map((src, i) => (
@@ -110,6 +118,8 @@ export function Item() {
           </div>
         </div>
       </div>
+
+      {zoom && <Lightbox images={images} startIndex={active} alt={item.title} onClose={() => setZoom(false)} />}
     </div>
   );
 }
