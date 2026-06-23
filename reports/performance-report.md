@@ -93,7 +93,20 @@ First-load metrics (median-of-5 mobile) vs opt 2 — **no change within noise** 
 | Requests | 1815 → 1813 ms | 1657 → 1656 | ~0.01 | 99 |
 
 (A single cold Lighthouse run can't capture the caching benefit; verified no first-load regression.)
-### 4. index.html head hygiene — _pending_
+### 4. index.html head hygiene ✅ (commit pending)
+Real `<title>` ("Swap — buy & sell secondhand, locally"), `meta description`, and `meta theme-color`
+(#5a3fe0). **Honest scope note:** the *performance* part of this item was meant to be a `preconnect`
+to the Vercel Blob image origin, but there's **no Blob store configured yet** (no token; seeded items
+have empty `image_urls`) and a preconnect needs the exact per-store subdomain — so it's left as a
+documented TODO in `index.html` to add once a store exists. The shipped changes are **SEO/UX, not
+Web-Vitals movers**. Re-measured anyway to confirm no regression:
+
+| Page | LCP | FCP | CLS | score |
+|---|---|---|---|---|
+| Home | 1814 → 1815 ms | 1656 | 0.051 | 99 |
+| Requests | 1813 → 1814 ms | 1656 | ~0.01 | 99 |
+
+Flat within noise, as expected.
 ### 5. Image attributes (optional) — _pending_
 
 ## Summary
