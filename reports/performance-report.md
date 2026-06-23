@@ -55,7 +55,26 @@ Moved the 3 Google Fonts from a render-blocking CSS `@import` in `src/styles/ind
 ~7% LCP improvement (the LCP element is the font-dependent hero text). Lab is on localhost with
 simulated throttling, so the request-chain saving is **understated** vs. a real slow network. No
 visual/behavior change; build clean. CSS shrank 19.01 → 18.86 kB (the `@import` line is gone).
-### 2. Route-based code splitting — _pending_
+### 2. Route-based code splitting ✅ (commit pending)
+`React.lazy` + `<Suspense>` in `src/components/App.jsx`.
+
+**Reassessment during this step (per the "stop if a metric regresses" rule):** lazy-loading *all*
+non-home routes shrank the initial chunk to 241 kB but **regressed `/requests` LCP 2113 → 2474 ms** —
+a cold deep-link to a lazy route adds a serialized round trip (main chunk → render → fetch route
+chunk → fetch data → LCP). The bundle savings are dominated by `Create.jsx` (100 kB; it pulls in
+`@vercel/blob`), not the tiny content-route chunks. So the final split keeps deep-linkable **content**
+pages (Home, Item, Requests, PublicProfile) **eager** and lazy-loads the heavy/secondary routes
+(Create, Login, Signup, Profile, EditProfile, MakeRequest, NotFound). No regression, ~all the savings.
+
+Cumulative vs baseline (includes opt 1):
+
+| Page | LCP | FCP | CLS | SI | score |
+|---|---|---|---|---|---|
+| Home | **2117 → 1815 ms** (−302) | 1808 → 1656 (−152) | 0.051 | 1808 → 1656 | 98 → 99 |
+| Requests | **2113 → 1815 ms** (−298) | 1806 → 1657 (−149) | 0.009 | 1806 → 1657 | 98 → 99 |
+
+**Initial JS chunk: 368.49 kB → 250.24 kB (gzip 111.69 → 79.34 kB, −32 kB).** `Create` (100 kB)
++ 6 small route chunks now load on demand. Build clean; all routes verified to resolve.
 ### 3. Vendor chunk splitting — _pending_
 ### 4. index.html head hygiene — _pending_
 ### 5. Image attributes (optional) — _pending_
