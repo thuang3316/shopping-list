@@ -18,10 +18,10 @@ export function ItemCard({ item }) {
       to={`/item/${item.id}`}
       className="bg-surface rounded-[var(--radius-card)] border border-line overflow-hidden flex flex-col transition-transform hover:-translate-y-1"
     >
-      <div className="aspect-square bg-paper grid place-items-center overflow-hidden">
+      <div className="aspect-square overflow-hidden">
         {img
-          ? <img src={img} alt={item.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
-          : <span className="text-ink-soft/40 font-mono text-xs">no photo</span>}
+          ? <img src={img} alt={item.title} className="block w-full h-full object-contain" loading="lazy" decoding="async" />
+          : <div className="w-full h-full bg-paper grid place-items-center"><span className="text-ink-soft/40 font-mono text-xs">no photo</span></div>}
       </div>
       <div className="p-4 flex flex-col gap-3 flex-1">
         <span className="eyebrow">{categoryLabel(item.category)}</span>
