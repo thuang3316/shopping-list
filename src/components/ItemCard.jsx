@@ -25,7 +25,7 @@ export function ItemCard({ item }) {
         {img
           ? (
             <button type="button" onClick={() => setZoom(true)} aria-label={`Zoom image of ${item.title}`}
-                    className="block w-full h-full cursor-zoom-in">
+                    className="block w-full h-full cursor-zoom-in p-3">
               <img src={img} alt={item.title} className="block w-full h-full object-contain" loading="lazy" decoding="async" />
             </button>
           )
