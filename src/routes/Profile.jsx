@@ -76,7 +76,10 @@ export function Profile() {
             </p>
           </div>
         </div>
-        <Link to="/create" className="btn btn-primary shrink-0">List an item</Link>
+        <div className="flex gap-2 shrink-0">
+          <Link to="/profile/edit" className="btn btn-ghost">Edit profile</Link>
+          <Link to="/create" className="btn btn-primary">List an item</Link>
+        </div>
       </div>
 
       {/* Tabs */}

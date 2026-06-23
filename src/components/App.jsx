@@ -7,6 +7,7 @@ import { Signup } from '../routes/Signup.jsx';
 import { Create } from '../routes/Create.jsx';
 import { Item } from '../routes/Item.jsx';
 import { Profile } from '../routes/Profile.jsx';
+import { EditProfile } from '../routes/EditProfile.jsx';
 import { PublicProfile } from '../routes/PublicProfile.jsx';
 import { MakeRequest } from '../routes/MakeRequest.jsx';
 import { Requests } from '../routes/Requests.jsx';
@@ -26,6 +27,7 @@ export function App() {
             <Route path="/item/:id" element={<Item />} />
             <Route path="/item/:id/edit" element={<Create />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/edit" element={<EditProfile />} />
             <Route path="/u/:username" element={<PublicProfile />} />
             <Route path="/make-request" element={<MakeRequest />} />
             <Route path="/requests" element={<Requests />} />
