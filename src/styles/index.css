@@ -1,5 +1,6 @@
 /* Swap Board — design system. See DESIGN.md for the rationale. */
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+/* Fonts are loaded in index.html (<link rel="preconnect"> + stylesheet) instead of
+   a CSS @import here, so they don't block on the app CSS download/parse first. */
 @import "tailwindcss";
 
 @theme {
