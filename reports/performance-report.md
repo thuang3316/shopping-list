@@ -115,4 +115,41 @@ have empty `image_urls`, and the measured pages (`/`, `/requests`) have no image
 as correct, low-risk future-proofing that takes effect once listings have photos; build clean.
 
 ## Summary
-_(final before/after deltas table — filled at the end)_
+
+Baseline (`ae1358a`) → final (`774aa5c`), median-of-5 mobile Lighthouse, identical conditions.
+
+| Metric | Home before → after | Requests before → after |
+|---|---|---|
+| **LCP** | 2117 → **1815 ms** (−302, −14%) | 2113 → **1814 ms** (−299, −14%) |
+| **FCP** | 1808 → **1656 ms** (−152, −8%) | 1806 → **1656 ms** (−150, −8%) |
+| Speed Index | 1808 → 1656 ms | 1806 → 1656 ms |
+| TBT | 0 → 0 ms | 0 → 0 ms |
+| CLS | 0.051 → 0.051 | 0.009 → 0.010 |
+| Perf score | 98 → **99** | 98 → **99** |
+| **Initial JS** | — | **368.49 kB → 251.31 kB raw** (gz **111.69 → 80.16**, −28%) |
+
+Initial JS = entry + framework loaded on first paint. After splitting: `vendor` 229.71 kB (gz 73.56,
+cached across deploys) + entry `index` 21.60 kB (gz 6.60); the 100 kB `Create`/`@vercel/blob` chunk
+and 6 small route chunks now load on demand.
+
+### What moved the needle
+- **LCP −14% / FCP −8%** came from optimizations **1 (font delivery)** and **2 (code splitting)** —
+  roughly half each. Font fix removed the render-blocking `@import` chain; code splitting shrank the
+  initial JS the browser must download+parse before the hero paints.
+- **Caching** from optimization **3** (vendor chunk) — structural, not visible in a cold run.
+- Optimizations **4 (head hygiene)** and **5 (image hints)** don't move Web Vitals on the current
+  dataset (SEO/UX; and there are no images yet) — shipped as correct housekeeping/future-proofing.
+
+### Caveats & honest limits
+- All numbers are **lab** (Lighthouse, simulated mobile throttle) on **localhost**, so TTFB ≈ 1 ms and
+  the network-chain savings (font fix especially) are **understated** vs. real users on slow links.
+  True INP and field LCP/CLS need RUM (`web-vitals`) once deployed.
+- The app already scored ~98 (tiny catalog, TBT 0), so absolute gains are modest in ms; the bundle
+  reduction (−28% initial JS) is the most durable win and scales with the app.
+- **CLS (0.051 on Home)** is unchanged — it's the hero headline reflowing on webfont swap. A future
+  low-risk fix is fallback font-metric overrides (`size-adjust`/`ascent-override`) or self-hosting +
+  preloading the display weight.
+
+### Verification
+`npm run build` clean after every step; both `/` and `/requests` screenshotted on the optimized build
+and visually identical to baseline; all routes resolve (lazy chunks load, no missing-default errors).
