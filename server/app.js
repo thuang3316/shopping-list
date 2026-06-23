@@ -22,16 +22,19 @@ export function createApp() {
     res.json({ ok: true, ts: new Date().toISOString() });
   });
 
-  // DB health check — confirms the Neon connection + schema are reachable.
-  app.get('/api/health/db', async (req, res, next) => {
-    try {
-      const [{ now }] = await sql`SELECT now()`;
-      const [{ count }] = await sql`SELECT count(*)::int AS count FROM items`;
-      res.json({ ok: true, now, items: count });
-    } catch (err) {
-      next(err);
-    }
-  });
+  // DB health check — local diagnostic only. Disabled in production so we don't
+  // expose DB reachability or row counts publicly.
+  if (process.env.NODE_ENV !== 'production') {
+    app.get('/api/health/db', async (req, res, next) => {
+      try {
+        const [{ now }] = await sql`SELECT now()`;
+        const [{ count }] = await sql`SELECT count(*)::int AS count FROM items`;
+        res.json({ ok: true, now, items: count });
+      } catch (err) {
+        next(err);
+      }
+    });
+  }
 
   // Feature routers
   app.use('/api/auth', authRouter);

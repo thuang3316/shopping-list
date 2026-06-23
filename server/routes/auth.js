@@ -1,31 +1,13 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import crypto from 'node:crypto';
 import { sql } from '../db.js';
 import { issueToken, clearToken, COOKIE, verifyToken } from '../auth.js';
-import { deliverCode } from '../email.js';
+import { EMAIL_RE, MAX_VERIFY_ATTEMPTS, hashCode, isCommonPassword, createAndSendCode } from '../account.js';
 
 const router = Router();
 
 // Wrap async handlers so rejected promises reach the error handler.
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
-
-const CODE_TTL_MS = 10 * 60 * 1000;
-const hashCode = (c) => crypto.createHash('sha256').update(c).digest('hex');
-const genCode = () => String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
-const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-// Reject the most common breached passwords (these trigger browser
-// leaked-password warnings and are trivially guessable). A small blocklist is
-// proportionate for v1; a full Have I Been Pwned k-anonymity check is a future
-// option (see .claude/skills — hardening, Step 9).
-const COMMON_PASSWORDS = new Set([
-  'password', 'password1', 'password123', 'passw0rd', '123456', '1234567', '12345678',
-  '123456789', '1234567890', '12345', '123123', '111111', '000000', 'qwerty', 'qwerty123',
-  'abc123', 'letmein', 'admin', 'welcome', 'iloveyou', 'monkey', 'dragon', 'sunshine',
-  'princess', 'football', 'baseball', 'starwars', 'whatever', 'trustno1',
-]);
-const isCommonPassword = (pw) => COMMON_PASSWORDS.has(pw.toLowerCase());
 
 const publicUser = (u) => ({ id: u.id, username: u.username, email: u.email, email_verified: u.email_verified, phone: u.phone });
 
@@ -55,10 +37,7 @@ router.post('/signup', asyncH(async (req, res) => {
     throw err;
   }
 
-  const code = genCode();
-  const expires = new Date(Date.now() + CODE_TTL_MS);
-  await sql`INSERT INTO email_verifications (email, code, expires_at) VALUES (${email}, ${hashCode(code)}, ${expires})`;
-  await deliverCode(email, code);
+  await createAndSendCode(email);
 
   res.status(201).json({ ok: true, email });
 }));
@@ -69,11 +48,22 @@ router.post('/verify', asyncH(async (req, res) => {
   const code = (req.body?.code || '').trim();
   if (!email || !code) return res.status(400).json({ error: 'Email and code are required' });
 
-  const [match] = await sql`
-    SELECT id FROM email_verifications
-    WHERE email = ${email} AND code = ${hashCode(code)} AND expires_at > now()
+  // Look up the newest unexpired code for this email, then compare in-app so we
+  // can count failed guesses and bound brute force (1M codes / 10-min window).
+  const [pending] = await sql`
+    SELECT id, code, attempts FROM email_verifications
+    WHERE email = ${email} AND expires_at > now()
     ORDER BY created_at DESC LIMIT 1`;
-  if (!match) return res.status(400).json({ error: 'Invalid or expired code' });
+  if (!pending) return res.status(400).json({ error: 'Invalid or expired code' });
+
+  if (pending.attempts >= MAX_VERIFY_ATTEMPTS) {
+    await sql`DELETE FROM email_verifications WHERE email = ${email}`;
+    return res.status(429).json({ error: 'Too many incorrect attempts — please sign up again to get a new code' });
+  }
+  if (pending.code !== hashCode(code)) {
+    await sql`UPDATE email_verifications SET attempts = attempts + 1 WHERE id = ${pending.id}`;
+    return res.status(400).json({ error: 'Invalid or expired code' });
+  }
 
   const [user] = await sql`
     UPDATE users SET email_verified = true WHERE email = ${email}
