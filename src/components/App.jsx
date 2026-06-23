@@ -7,6 +7,9 @@ import { Signup } from '../routes/Signup.jsx';
 import { Create } from '../routes/Create.jsx';
 import { Item } from '../routes/Item.jsx';
 import { Profile } from '../routes/Profile.jsx';
+import { PublicProfile } from '../routes/PublicProfile.jsx';
+import { MakeRequest } from '../routes/MakeRequest.jsx';
+import { Requests } from '../routes/Requests.jsx';
 import { NotFound } from '../routes/NotFound.jsx';
 
 export function App() {
@@ -23,6 +26,9 @@ export function App() {
             <Route path="/item/:id" element={<Item />} />
             <Route path="/item/:id/edit" element={<Create />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/u/:username" element={<PublicProfile />} />
+            <Route path="/make-request" element={<MakeRequest />} />
+            <Route path="/requests" element={<Requests />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

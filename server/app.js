@@ -5,6 +5,8 @@ import { sql } from './db.js';
 import authRouter from './routes/auth.js';
 import itemsRouter from './routes/items.js';
 import meRouter from './routes/me.js';
+import requestsRouter from './routes/requests.js';
+import usersRouter from './routes/users.js';
 
 // Build the Express app. Exported (not listened) so it can run both as a
 // Vercel serverless handler (api/index.js) and a local dev server (dev.js).
@@ -35,7 +37,8 @@ export function createApp() {
   app.use('/api/auth', authRouter);
   app.use('/api/items', itemsRouter);
   app.use('/api/me', meRouter);
-  // (requests mounts here as it is built)
+  app.use('/api/requests', requestsRouter);
+  app.use('/api/users', usersRouter);
 
   app.use(errorHandler); // must be last
   return app;
