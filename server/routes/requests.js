@@ -58,4 +58,14 @@ router.post('/', createRequestLimit, requireAuth, asyncH(async (req, res) => {
   res.status(201).json({ id: r.id });
 }));
 
+// DELETE /api/requests/:id — delete own request. Ownership in the WHERE clause →
+// 404 (not 403) for someone else's request, matching the items pattern.
+router.delete('/:id', requireAuth, asyncH(async (req, res) => {
+  const { id } = req.params;
+  if (!/^\d+$/.test(id)) return res.status(404).json({ error: 'Request not found' });
+  const rows = await sql`DELETE FROM requests WHERE id = ${id} AND buyer_id = ${req.user.id} RETURNING id`;
+  if (!rows.length) return res.status(404).json({ error: 'Request not found' });
+  res.json({ ok: true });
+}));
+
 export default router;

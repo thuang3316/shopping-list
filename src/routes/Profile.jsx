@@ -39,6 +39,30 @@ function MyItemRow({ item, onChanged }) {
   );
 }
 
+function MyRequestRow({ request, onChanged }) {
+  const [busy, setBusy] = useState(false);
+
+  // Mirror MyItemRow: on an expired session the api layer already redirects, so
+  // don't also pop a redundant alert.
+  const act = async (fn) => { setBusy(true); try { await fn(); await onChanged(); } catch (e) { if (!e.sessionExpired) alert(e.message); } finally { setBusy(false); } };
+  const remove = () => { if (confirm("Delete this request? This can't be undone.")) act(() => api(`/requests/${request.id}`, { method: 'DELETE' })); };
+
+  return (
+    <div className="flex gap-4 bg-surface border border-line rounded-[var(--radius-card)] p-4 items-center">
+      <div className="flex-1 min-w-0">
+        <span className="eyebrow">{categoryLabel(request.category)}</span>
+        <p className="font-semibold">{request.title}</p>
+        {(request.price_min || request.price_max) && (
+          <p className="text-sm text-ink-soft">Budget: {request.price_min ? `$${request.price_min}` : '—'} to {request.price_max ? `$${request.price_max}` : '—'}</p>
+        )}
+      </div>
+      <div className="shrink-0">
+        <button type="button" className="btn btn-ghost text-sm text-sold" onClick={remove} disabled={busy}>Delete</button>
+      </div>
+    </div>
+  );
+}
+
 export function Profile() {
   const { user, loading: authLoading } = useAuth();
   const [tab, setTab] = useState('products');
@@ -109,15 +133,7 @@ export function Profile() {
         )
       ) : requests.length ? (
         <div className="flex flex-col gap-3">
-          {requests.map((r) => (
-            <div key={r.id} className="bg-surface border border-line rounded-[var(--radius-card)] p-4">
-              <span className="eyebrow">{categoryLabel(r.category)}</span>
-              <p className="font-semibold">{r.title}</p>
-              {(r.price_min || r.price_max) && (
-                <p className="text-sm text-ink-soft">Budget: {r.price_min ? `$${r.price_min}` : '—'} to {r.price_max ? `$${r.price_max}` : '—'}</p>
-              )}
-            </div>
-          ))}
+          {requests.map((r) => <MyRequestRow key={r.id} request={r} onChanged={load} />)}
         </div>
       ) : (
         <div className="text-center py-16">

@@ -67,3 +67,33 @@ describe('POST /api/requests', () => {
     expect(res.body.requests[0]).toMatchObject({ price_min: null, price_max: null });
   });
 });
+
+describe('DELETE /api/requests/:id', () => {
+  it('returns 401 when not authenticated', async () => {
+    await request(app).delete('/api/requests/1').expect(401);
+  });
+
+  it('returns 404 for a non-numeric id', async () => {
+    const { agent } = await registerVerifiedUser();
+    await agent.delete('/api/requests/abc').expect(404);
+  });
+
+  it('deletes the caller\'s own request and removes it from the feed', async () => {
+    const { agent } = await registerVerifiedUser();
+    const id = (await agent.post('/api/requests').send({ title: 'Want a kettle', category: 'home' })).body.id;
+    await agent.delete(`/api/requests/${id}`).expect(200);
+    const res = await request(app).get('/api/requests');
+    expect(res.body.requests).toEqual([]);
+  });
+
+  it('returns 404 when deleting another user\'s request and leaves it intact', async () => {
+    const owner = await registerVerifiedUser();
+    const id = (await owner.agent.post('/api/requests').send({ title: 'Want a tent', category: 'sports' })).body.id;
+    const other = await registerVerifiedUser();
+
+    await other.agent.delete(`/api/requests/${id}`).expect(404);
+
+    const res = await request(app).get('/api/requests');
+    expect(res.body.requests.map((r) => r.title)).toEqual(['Want a tent']);
+  });
+});
