@@ -25,6 +25,8 @@ reports/artifacts/
 # Claude — keep skills/agents, ignore local scratch & personal settings
 .claude/agent-memory/
 .claude/settings.local.json
+CLAUDE.md
+eager-honking-orbit.md
 
 # Editor directories and files
 .vscode/*
