@@ -2,9 +2,16 @@ import express, { Router } from 'express';
 import { put } from '@vercel/blob';
 import { sql } from '../db.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rateLimit.js';
 
 const router = Router();
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// Per-IP limits on the abuse-prone writes: image upload (transits a 4 MB body to
+// Blob) and listing creation. Generous enough for real use (a listing has a few
+// photos), low enough to blunt scripted spam.
+const uploadLimit = rateLimit({ name: 'upload', limit: 40, windowMs: 60 * 60 * 1000 });
+const createItemLimit = rateLimit({ name: 'create_item', limit: 30, windowMs: 60 * 60 * 1000 });
 
 const CATEGORIES = new Set([
   'furniture', 'electronics', 'bikes', 'photo', 'music',
@@ -81,7 +88,7 @@ router.get('/:id', optionalAuth, asyncH(async (req, res) => {
 // the blob PUT — so the form stuck on "Saving…". Server-side put() is simpler and
 // reliable; the only cost is the file transiting the function, fine for one small
 // photo under Vercel's ~4.5 MB body limit.)
-router.post('/upload', requireAuth, express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }), asyncH(async (req, res) => {
+router.post('/upload', uploadLimit, requireAuth, express.raw({ type: () => true, limit: MAX_UPLOAD_BYTES }), asyncH(async (req, res) => {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     return res.status(503).json({ error: 'Image uploads are not configured yet (no Blob store).' });
   }
@@ -99,7 +106,7 @@ router.post('/upload', requireAuth, express.raw({ type: () => true, limit: MAX_U
 }));
 
 // POST /api/items — create a listing (auth required; owner = current user).
-router.post('/', requireAuth, asyncH(async (req, res) => {
+router.post('/', createItemLimit, requireAuth, asyncH(async (req, res) => {
   const title = (req.body?.title || '').trim();
   const category = (req.body?.category || '').trim();
   const description = (req.body?.description || '').trim() || null;

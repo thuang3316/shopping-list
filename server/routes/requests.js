@@ -1,9 +1,13 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
 import { requireAuth } from '../middleware/auth.js';
+import { rateLimit } from '../middleware/rateLimit.js';
 
 const router = Router();
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// Per-IP cap on posting buy requests, to blunt scripted spam.
+const createRequestLimit = rateLimit({ name: 'create_request', limit: 30, windowMs: 60 * 60 * 1000 });
 
 const CATEGORIES = new Set([
   'furniture', 'electronics', 'bikes', 'photo', 'music',
@@ -27,7 +31,7 @@ router.get('/', asyncH(async (req, res) => {
 }));
 
 // POST /api/requests — post a buy request (auth required).
-router.post('/', requireAuth, asyncH(async (req, res) => {
+router.post('/', createRequestLimit, requireAuth, asyncH(async (req, res) => {
   const title = (req.body?.title || '').trim();
   const category = (req.body?.category || '').trim();
 

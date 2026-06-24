@@ -3,16 +3,25 @@ import bcrypt from 'bcryptjs';
 import { sql } from '../db.js';
 import { issueToken, clearToken, COOKIE, verifyToken } from '../auth.js';
 import { EMAIL_RE, isCommonPassword, createAndSendCode, checkCode } from '../account.js';
+import { rateLimit } from '../middleware/rateLimit.js';
 
 const router = Router();
 
 // Wrap async handlers so rejected promises reach the error handler.
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+// Per-IP limits. Login is the credential-stuffing target; signup/forgot each
+// cost a bcrypt hash and/or an email send, so they're throttled harder.
+const MIN = 60 * 1000;
+const loginLimit = rateLimit({ name: 'login', limit: 10, windowMs: 15 * MIN });
+const signupLimit = rateLimit({ name: 'signup', limit: 5, windowMs: 60 * MIN });
+const forgotLimit = rateLimit({ name: 'forgot', limit: 5, windowMs: 60 * MIN });
+const codeLimit = rateLimit({ name: 'code', limit: 20, windowMs: 15 * MIN }); // verify + reset
+
 const publicUser = (u) => ({ id: u.id, username: u.username, email: u.email, email_verified: u.email_verified, phone: u.phone });
 
 // POST /api/auth/signup — create an unverified user and email a code.
-router.post('/signup', asyncH(async (req, res) => {
+router.post('/signup', signupLimit, asyncH(async (req, res) => {
   const username = (req.body?.username || '').trim();
   const email = (req.body?.email || '').trim();
   const password = req.body?.password || '';
@@ -43,7 +52,7 @@ router.post('/signup', asyncH(async (req, res) => {
 }));
 
 // POST /api/auth/verify — confirm the code, mark verified, and log in.
-router.post('/verify', asyncH(async (req, res) => {
+router.post('/verify', codeLimit, asyncH(async (req, res) => {
   const email = (req.body?.email || '').trim();
   const code = (req.body?.code || '').trim();
   if (!email || !code) return res.status(400).json({ error: 'Email and code are required' });
@@ -63,7 +72,7 @@ router.post('/verify', asyncH(async (req, res) => {
 
 // POST /api/auth/forgot — email a password-reset code. Always responds 200 with
 // a generic message so it can't be used to probe which emails are registered.
-router.post('/forgot', asyncH(async (req, res) => {
+router.post('/forgot', forgotLimit, asyncH(async (req, res) => {
   const email = (req.body?.email || '').trim();
   if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'Enter a valid email address' });
 
@@ -76,7 +85,7 @@ router.post('/forgot', asyncH(async (req, res) => {
 }));
 
 // POST /api/auth/reset — set a new password using a reset code, then log in.
-router.post('/reset', asyncH(async (req, res) => {
+router.post('/reset', codeLimit, asyncH(async (req, res) => {
   const email = (req.body?.email || '').trim();
   const code = (req.body?.code || '').trim();
   const password = req.body?.password || '';
@@ -99,7 +108,7 @@ router.post('/reset', asyncH(async (req, res) => {
 }));
 
 // POST /api/auth/login — verify password, require a verified email, log in.
-router.post('/login', asyncH(async (req, res) => {
+router.post('/login', loginLimit, asyncH(async (req, res) => {
   const email = (req.body?.email || '').trim();
   const password = req.body?.password || '';
   if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
