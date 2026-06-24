@@ -33,6 +33,17 @@ router.post('/signup', signupLimit, asyncH(async (req, res) => {
   if (isCommonPassword(password)) return res.status(400).json({ error: 'That password is too common and appears in known breaches — please choose another' });
 
   const password_hash = await bcrypt.hash(password, 12);
+
+  // Free any UNVERIFIED account squatting this email or username, so a retry
+  // after a bounced/abandoned verification isn't permanently blocked by the
+  // UNIQUE constraints. Verified accounts are never touched → they still 409
+  // below. An unverified user is never logged in (no token until /verify) so it
+  // owns no listings/requests — nothing is lost. Also drop its stale codes.
+  await sql`DELETE FROM users
+            WHERE email_verified = false
+              AND (email = ${email} OR username = ${username})`;
+  await sql`DELETE FROM email_verifications WHERE email = ${email}`;
+
   let user;
   try {
     [user] = await sql`
