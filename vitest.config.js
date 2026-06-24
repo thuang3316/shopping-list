@@ -16,7 +16,10 @@ export default defineConfig({
           name: 'node',
           globals: true,
           environment: 'node',
-          include: ['server/**/*.test.js', 'src/lib/**/*.test.js', 'tests/**/*.test.js'],
+          // Backend + shared pure logic. API integration tests live under
+          // tests/api/ and run in the separate `api` project (with the test-DB
+          // setup), so they're intentionally NOT matched here.
+          include: ['server/**/*.test.js', 'src/lib/**/*.test.js'],
         },
       },
       {
@@ -27,6 +30,18 @@ export default defineConfig({
           environment: 'jsdom',
           include: ['src/**/*.test.jsx'],
           setupFiles: ['./vitest.setup.js'],
+        },
+      },
+      {
+        test: {
+          name: 'api',
+          globals: true,
+          environment: 'node',
+          include: ['tests/api/**/*.test.js'],
+          setupFiles: ['./tests/helpers/testEnv.js'],
+          // The API tests share one Neon test branch and TRUNCATE between tests,
+          // so test files must not run concurrently against it.
+          fileParallelism: false,
         },
       },
     ],

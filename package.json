@@ -9,11 +9,14 @@
     "dev:api": "nodemon server/dev.js",
     "build": "vite build",
     "db:migrate": "node server/migrate.js",
+    "db:migrate:test": "node server/migrate-test.js",
     "db:seed": "node server/seed.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:unit": "vitest run --project node --project jsdom",
+    "test:api": "vitest run --project api",
     "verify": "eslint . && vite build && vitest run"
   },
   "dependencies": {
@@ -47,6 +50,7 @@
     "globals": "^16.5.0",
     "jsdom": "^29.1.1",
     "nodemon": "^3.1.14",
+    "supertest": "^7.2.2",
     "vite": "^7.2.4",
     "vitest": "^4.1.9"
   }
