@@ -1,6 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { errorHandler } from './middleware/errorHandler.js';
+import { validateEnv } from './env.js';
 import { sql } from './db.js';
 import authRouter from './routes/auth.js';
 import itemsRouter from './routes/items.js';
@@ -12,6 +13,8 @@ import usersRouter from './routes/users.js';
 // Vercel serverless handler (api/index.js) and a local dev server (dev.js).
 // See .claude/skills/express-vercel-api.
 export function createApp() {
+  validateEnv(); // fail fast on a misconfigured deploy before building the app
+
   const app = express();
 
   app.disable('x-powered-by'); // don't advertise the framework/stack

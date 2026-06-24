@@ -6,9 +6,17 @@ import { Resend } from 'resend';
 const isProd = process.env.NODE_ENV === 'production';
 
 export async function deliverCode(email, code) {
-  if (!isProd || !process.env.RESEND_API_KEY) {
+  // Dev (or any non-prod): log the code to the server console so signup can be
+  // built/tested without an email provider.
+  if (!isProd) {
     console.log(`\n[dev] verification code for ${email}: ${code}\n`);
     return;
+  }
+  // Production must actually send. If the key is missing, fail loudly rather
+  // than silently console-logging and returning 200 (which would make signup
+  // look successful while no email is ever delivered).
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY is not set — cannot send verification email in production.');
   }
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
