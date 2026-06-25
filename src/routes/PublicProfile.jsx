@@ -57,7 +57,7 @@ export function PublicProfile() {
 
   return (
     <div className="max-w-4xl mx-auto px-5 py-10">
-      {/* Identity — public: no email/phone. */}
+      {/* Identity — signed-in members see contact info (email/phone). */}
       <div className="flex items-center gap-4 min-w-0 mb-8">
         <div className="w-16 h-16 shrink-0 rounded-full bg-grape text-white grid place-items-center font-display font-900 text-2xl">
           {user.username[0].toUpperCase()}
@@ -65,6 +65,12 @@ export function PublicProfile() {
         <div className="min-w-0">
           <h1 className="text-3xl leading-tight truncate">{user.username}</h1>
           <p className="text-sm text-ink-soft">Member since {memberSince(user.created_at)}</p>
+          {user.email && (
+            <p className="text-sm mt-1">
+              <a href={`mailto:${user.email}`} className="text-grape font-semibold break-all">{user.email}</a>
+              {user.phone && <span className="text-ink-soft"> · {user.phone}</span>}
+            </p>
+          )}
         </div>
       </div>
 

@@ -1,20 +1,21 @@
 import { Router } from 'express';
 import { sql } from '../db.js';
+import { requireAuth } from '../middleware/auth.js';
 
-// Public member profiles. No auth: anyone can view a user's listings + requests.
-// Contact info (email/phone) is NEVER selected here — it stays gated behind the
-// signed-in item page, exactly like GET /api/items/:id.
+// Member profiles. Auth required: only signed-in members can view a profile, so
+// the seller's contact info (email/phone) is included — exactly the same gating
+// model as the seller block on the item page. password_hash is NEVER selected.
 const router = Router();
 const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-// GET /api/users/:username — public profile. username is CITEXT, so the match
-// is case-insensitive.
-router.get('/:username', asyncH(async (req, res) => {
+// GET /api/users/:username — member profile (signed-in only). username is CITEXT,
+// so the match is case-insensitive.
+router.get('/:username', requireAuth, asyncH(async (req, res) => {
   const username = (req.params.username || '').trim();
   if (!username) return res.status(404).json({ error: 'User not found' });
 
   const [user] = await sql`
-    SELECT id, username, created_at FROM users WHERE username = ${username}`;
+    SELECT id, username, email, phone, created_at FROM users WHERE username = ${username}`;
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   const items = await sql`
@@ -28,7 +29,7 @@ router.get('/:username', asyncH(async (req, res) => {
     ORDER BY created_at DESC`;
 
   res.json({
-    user: { username: user.username, created_at: user.created_at },
+    user: { username: user.username, email: user.email, phone: user.phone, created_at: user.created_at },
     items,
     requests,
   });

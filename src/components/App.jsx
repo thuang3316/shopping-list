@@ -45,7 +45,7 @@ export function App() {
               <Route path="/item/:id/edit" element={<RequireAuth><Create /></RequireAuth>} />
               <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
               <Route path="/profile/edit" element={<RequireAuth><EditProfile /></RequireAuth>} />
-              <Route path="/u/:username" element={<PublicProfile />} />
+              <Route path="/u/:username" element={<RequireAuth><PublicProfile /></RequireAuth>} />
               <Route path="/make-request" element={<RequireAuth><MakeRequest /></RequireAuth>} />
               <Route path="/requests" element={<Requests />} />
               <Route path="*" element={<NotFound />} />

@@ -102,7 +102,7 @@ export function Item() {
           {/* Seller contact — gated behind auth */}
           <div className="mt-2 bg-surface border border-line rounded-[var(--radius-card)] p-5">
             <span className="eyebrow">Seller</span>
-            <p className="text-lg font-semibold mt-1">{seller.username}</p>
+            <Link to={`/u/${encodeURIComponent(seller.username)}`} className="block text-lg font-semibold mt-1 hover:text-grape">{seller.username}</Link>
             {seller.email ? (
               <div className="mt-3 flex flex-col gap-1 text-sm">
                 <a href={`mailto:${seller.email}`} className="text-grape font-semibold">{seller.email}</a>
