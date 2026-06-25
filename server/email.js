@@ -41,3 +41,44 @@ export async function deliverCode(email, code, purpose = 'signup') {
            <p>It expires in 10 minutes. If you didn't request this, you can ignore this email.</p>`,
   });
 }
+
+// Escape user-supplied text before putting it in an HTML email body, so a message
+// can't inject markup into the owner's inbox. (deliverCode doesn't need this — it
+// only interpolates a system-generated numeric code.)
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Send a user's feedback to the site owner. Same dev/prod split as deliverCode:
+// non-prod logs to the console; prod sends via Resend to OWNER_EMAIL. Best-effort —
+// the caller stores the feedback in the DB first and must not fail the request if
+// this throws. Reply-To is the sender so a reply goes straight back to them.
+export async function deliverFeedback({ message, category, fromEmail, fromUsername }) {
+  if (!isProd) {
+    console.log(`\n[dev] feedback (${category}) from ${fromUsername} <${fromEmail}>:\n${message}\n`);
+    return;
+  }
+  const to = process.env.OWNER_EMAIL;
+  if (!to) {
+    console.error('[email] OWNER_EMAIL is not set — feedback stored but not emailed.');
+    return;
+  }
+  if (!process.env.RESEND_API_KEY) {
+    console.error('[email] RESEND_API_KEY is not set — feedback stored but not emailed.');
+    return;
+  }
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  await resend.emails.send({
+    from: FROM,
+    to,
+    replyTo: fromEmail,
+    subject: `[Swap feedback] ${category} — from ${fromUsername}`,
+    html: `<p><strong>${escapeHtml(fromUsername)}</strong> (${escapeHtml(fromEmail)}) sent feedback — <em>${escapeHtml(category)}</em>:</p>
+           <p style="white-space:pre-wrap">${escapeHtml(message)}</p>`,
+  });
+}

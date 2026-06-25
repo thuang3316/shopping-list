@@ -9,3 +9,11 @@ export const __codes = [];
 export const deliverCode = vi.fn(async (email, code, purpose = 'signup') => {
   __codes.push({ email, code, purpose });
 });
+
+// Captures feedback that would have been emailed to the owner. Tests assert against
+// this instead of sending. Clear it between tests with `__feedback.length = 0`.
+export const __feedback = [];
+
+export const deliverFeedback = vi.fn(async (payload) => {
+  __feedback.push(payload);
+});

@@ -7,14 +7,15 @@
 import request from 'supertest';
 import { sql } from '../../server/db.js';
 import { createApp } from '../../server/app.js';
-import { __codes } from '../../server/email.js';
+import { __codes, __feedback } from '../../server/email.js';
 
 export const app = createApp();
 
 // Wipe all mutable tables + the captured emails. Call in beforeEach.
 export async function resetDb() {
-  await sql`TRUNCATE users, items, requests, email_verifications, rate_limits RESTART IDENTITY CASCADE`;
+  await sql`TRUNCATE users, items, requests, email_verifications, rate_limits, feedback RESTART IDENTITY CASCADE`;
   __codes.length = 0;
+  __feedback.length = 0;
 }
 
 let seq = 0;

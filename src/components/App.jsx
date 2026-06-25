@@ -22,6 +22,7 @@ const Create = lazyRoute(() => import('../routes/Create.jsx'), 'Create');
 const Profile = lazyRoute(() => import('../routes/Profile.jsx'), 'Profile');
 const EditProfile = lazyRoute(() => import('../routes/EditProfile.jsx'), 'EditProfile');
 const MakeRequest = lazyRoute(() => import('../routes/MakeRequest.jsx'), 'MakeRequest');
+const Feedback = lazyRoute(() => import('../routes/Feedback.jsx'), 'Feedback');
 const NotFound = lazyRoute(() => import('../routes/NotFound.jsx'), 'NotFound');
 
 function RouteFallback() {
@@ -47,6 +48,7 @@ export function App() {
               <Route path="/profile/edit" element={<RequireAuth><EditProfile /></RequireAuth>} />
               <Route path="/u/:username" element={<RequireAuth><PublicProfile /></RequireAuth>} />
               <Route path="/make-request" element={<RequireAuth><MakeRequest /></RequireAuth>} />
+              <Route path="/feedback" element={<RequireAuth><Feedback /></RequireAuth>} />
               <Route path="/requests" element={<Requests />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

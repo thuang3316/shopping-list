@@ -37,6 +37,9 @@ export function Nav() {
           <NavLink to="/requests" className={linkClass}>
             Requests
           </NavLink>
+          <NavLink to="/feedback" className={linkClass}>
+            Feedback
+          </NavLink>
         </div>
 
         <div className="flex items-center gap-3">
@@ -88,6 +91,9 @@ export function Nav() {
             </NavLink>
             <NavLink to="/requests" onClick={closeMenu} className={mobileLinkClass}>
               Requests
+            </NavLink>
+            <NavLink to="/feedback" onClick={closeMenu} className={mobileLinkClass}>
+              Feedback
             </NavLink>
             {user && (
               <NavLink to="/profile" onClick={closeMenu} className={mobileLinkClass}>

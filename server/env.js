@@ -48,4 +48,10 @@ export function validateEnv() {
         'Set it to an address on your verified domain (e.g. noreply@mail.hereweswap.com).'
     );
   }
+  if (isProd && !process.env.OWNER_EMAIL) {
+    console.error(
+      '[env] WARNING: OWNER_EMAIL is not set in production — user feedback will be ' +
+        'stored in the database but not emailed to you.'
+    );
+  }
 }
