@@ -7,8 +7,10 @@ beforeEach(async () => { await resetDb(); });
 
 // Login is limited to 10 / 15 min per client IP. Bad credentials still count
 // (the limiter runs before the handler), so we can probe with junk logins.
+// We set X-Real-IP — the header Vercel populates with the true client IP in prod
+// (and what the limiter's clientIp() reads first).
 const login = (ip) =>
-  request(app).post('/api/auth/login').set('X-Forwarded-For', ip).send({ email: 'x@y.z', password: 'whatever' });
+  request(app).post('/api/auth/login').set('X-Real-IP', ip).send({ email: 'x@y.z', password: 'whatever' });
 
 describe('rate limiting on /api/auth/login', () => {
   it('allows up to the limit, then returns 429 with a Retry-After header', async () => {

@@ -3,13 +3,18 @@
 // shared across instances. See migration 004_rate_limits.sql.
 import { sql } from '../db.js';
 
-// Best-effort client IP. On Vercel the platform sets x-forwarded-for; locally we
-// fall back to the socket address. (x-forwarded-for is only trustworthy behind a
-// proxy that sets it — which is exactly our deploy topology.)
+// Best-effort client IP. On Vercel both x-real-ip and x-forwarded-for are OVERWRITTEN
+// by the platform with the real client IP; client-supplied values are dropped
+// (vercel.com/docs/headers/request-headers), so they're trustworthy here. Prefer
+// x-real-ip (a single address, no list to mis-parse). Locally there's no proxy, so we
+// fall back to the socket address.
+// ⚠️ If this app is ever served behind a proxy that APPENDS to X-Forwarded-For instead
+// of overwriting it, revisit this — the leftmost XFF entry would then be client-spoofable.
 function clientIp(req) {
-  const xff = req.headers['x-forwarded-for'];
-  if (xff) return xff.split(',')[0].trim();
-  return req.headers['x-real-ip'] || req.socket?.remoteAddress || 'unknown';
+  return req.headers['x-real-ip']
+    || req.headers['x-forwarded-for']?.split(',')[0].trim()
+    || req.socket?.remoteAddress
+    || 'unknown';
 }
 
 // rateLimit({ name, limit, windowMs }) → Express middleware that allows up to

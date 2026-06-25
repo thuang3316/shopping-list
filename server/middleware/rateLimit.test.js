@@ -21,7 +21,7 @@ describe('rateLimit middleware', () => {
   it('fails open (calls next, returns no 429) when the database throws', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const mw = rateLimit({ name: 'test', limit: 1, windowMs: 1000 });
-    const req = { headers: { 'x-forwarded-for': '1.2.3.4' }, socket: {} };
+    const req = { headers: { 'x-real-ip': '1.2.3.4' }, socket: {} };
     const res = mockRes();
     const next = vi.fn();
 
