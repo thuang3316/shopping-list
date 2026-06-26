@@ -29,9 +29,9 @@ describe('GET /api/items', () => {
   it('filters by category', async () => {
     const { agent } = await registerVerifiedUser();
     await createItem(agent, { title: 'Couch', category: 'furniture' });
-    await createItem(agent, { title: 'Road Bike', category: 'bikes' });
-    const res = await request(app).get('/api/items?category=bikes');
-    expect(res.body.items.map((i) => i.title)).toEqual(['Road Bike']);
+    await createItem(agent, { title: 'Laptop', category: 'electronics' });
+    const res = await request(app).get('/api/items?category=electronics');
+    expect(res.body.items.map((i) => i.title)).toEqual(['Laptop']);
   });
 });
 

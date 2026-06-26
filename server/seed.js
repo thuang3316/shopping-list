@@ -8,12 +8,13 @@ import { sql } from './db.js';
 const DEMO = { username: 'demo', email: 'demo@swap.test', phone: '555-0100', password: 'swap-demo-2026!' };
 
 const ITEMS = [
-  { title: 'Cannondale road bike, 56cm',     category: 'bikes',       price: 120,  description: 'Light alloy frame, recently serviced. Rides great.' },
   { title: 'Mid-century teak desk',          category: 'furniture',   price: 85,   description: 'Some surface wear, structurally solid.' },
-  { title: 'Film camera + 50mm lens',        category: 'photo',       price: null, description: 'Fully working, light meter accurate. Open to offers.' },
-  { title: 'Stack of vinyl records (~40)',   category: 'music',       price: 40,   description: 'Mostly jazz and soul, all play fine.' },
+  { title: 'Cast-iron skillet, 12"',         category: 'kitchen',     price: 18,   description: 'Well seasoned, no cracks. Great for searing.' },
+  { title: 'Film camera + 50mm lens',        category: 'electronics', price: null, description: 'Fully working, light meter accurate. Open to offers.' },
   { title: 'IKEA bookshelf, white',          category: 'home',        price: 25,   description: 'Moving out, must go this week.' },
+  { title: 'Calculus textbook bundle',       category: 'books',       price: 30,   description: 'Three titles, light highlighting inside.' },
   { title: 'Winter jacket, size M',          category: 'clothing',    price: null, description: 'Worn one season. Price negotiable.' },
+  { title: 'Moving boxes (~15, used once)',  category: 'free',        price: 0,    description: 'Free to a good home — just collect this weekend.' },
 ];
 
 async function run() {

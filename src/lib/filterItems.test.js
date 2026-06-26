@@ -2,9 +2,9 @@ import { applyFilters } from './filterItems.js';
 
 // Fixture: prices are NUMERIC strings (as Neon returns them); null = Negotiable.
 const ITEMS = [
-  { id: '1', title: 'Red Bicycle',   category: 'bikes',     price: '120.00', created_at: '2026-01-01T00:00:00Z' },
+  { id: '1', title: 'Red Bicycle',   category: 'electronics',     price: '120.00', created_at: '2026-01-01T00:00:00Z' },
   { id: '2', title: 'Office Chair',  category: 'furniture', price: '45.00',  created_at: '2026-02-01T00:00:00Z' },
-  { id: '3', title: 'Mountain Bike', category: 'bikes',     price: null,     created_at: '2026-03-01T00:00:00Z' },
+  { id: '3', title: 'Mountain Bike', category: 'electronics',     price: null,     created_at: '2026-03-01T00:00:00Z' },
   { id: '4', title: 'Desk Lamp',     category: 'home',      price: '20.00',  created_at: '2026-01-15T00:00:00Z' },
 ];
 
@@ -20,7 +20,7 @@ describe('applyFilters', () => {
   });
 
   it('filters by exact category', () => {
-    expect(ids(applyFilters(ITEMS, { category: 'bikes' })).sort()).toEqual(['1', '3']);
+    expect(ids(applyFilters(ITEMS, { category: 'electronics' })).sort()).toEqual(['1', '3']);
   });
 
   it('excludes items priced below minPrice', () => {
@@ -52,7 +52,7 @@ describe('applyFilters', () => {
   });
 
   it('combines search, category, and price filters', () => {
-    expect(ids(applyFilters(ITEMS, { category: 'bikes', minPrice: '100' }))).toEqual(['1']);
+    expect(ids(applyFilters(ITEMS, { category: 'electronics', minPrice: '100' }))).toEqual(['1']);
   });
 
   it('returns an empty array for empty input', () => {

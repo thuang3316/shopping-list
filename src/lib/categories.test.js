@@ -2,7 +2,7 @@ import { CATEGORIES, categoryLabel } from './categories.js';
 
 describe('categoryLabel', () => {
   it('returns the human label for a known value', () => {
-    expect(categoryLabel('bikes')).toBe('Bikes');
+    expect(categoryLabel('furniture')).toBe('🪑 Furniture');
   });
 
   it('returns the raw value when the category is unknown', () => {

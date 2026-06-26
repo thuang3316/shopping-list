@@ -16,9 +16,9 @@ describe('GET /api/requests', () => {
   it('filters by category', async () => {
     const { agent } = await registerVerifiedUser();
     await agent.post('/api/requests').send({ title: 'Want a sofa', category: 'furniture' }).expect(201);
-    await agent.post('/api/requests').send({ title: 'Want a helmet', category: 'bikes' }).expect(201);
-    const res = await request(app).get('/api/requests?category=bikes');
-    expect(res.body.requests.map((r) => r.title)).toEqual(['Want a helmet']);
+    await agent.post('/api/requests').send({ title: 'Want a laptop', category: 'electronics' }).expect(201);
+    const res = await request(app).get('/api/requests?category=electronics');
+    expect(res.body.requests.map((r) => r.title)).toEqual(['Want a laptop']);
   });
 });
 
@@ -29,7 +29,7 @@ describe('POST /api/requests', () => {
 
   it('creates a request and returns its id', async () => {
     const { agent } = await registerVerifiedUser();
-    const res = await agent.post('/api/requests').send({ title: 'Want a tent', category: 'sports', price_min: 20, price_max: 80 });
+    const res = await agent.post('/api/requests').send({ title: 'Want a tent', category: 'other', price_min: 20, price_max: 80 });
     expect(res.status).toBe(201);
     expect(res.body.id).toBeDefined();
   });
@@ -88,7 +88,7 @@ describe('DELETE /api/requests/:id', () => {
 
   it('returns 404 when deleting another user\'s request and leaves it intact', async () => {
     const owner = await registerVerifiedUser();
-    const id = (await owner.agent.post('/api/requests').send({ title: 'Want a tent', category: 'sports' })).body.id;
+    const id = (await owner.agent.post('/api/requests').send({ title: 'Want a tent', category: 'other' })).body.id;
     const other = await registerVerifiedUser();
 
     await other.agent.delete(`/api/requests/${id}`).expect(404);

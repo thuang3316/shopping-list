@@ -32,7 +32,7 @@ describe('GET /api/me/* — auth required', () => {
     const me = await registerVerifiedUser();
     await me.agent.post('/api/requests').send({ title: 'Want a desk', category: 'furniture' }).expect(201);
     const other = await registerVerifiedUser();
-    await other.agent.post('/api/requests').send({ title: 'Want a bike', category: 'bikes' }).expect(201);
+    await other.agent.post('/api/requests').send({ title: 'Want a bike', category: 'electronics' }).expect(201);
 
     const res = await me.agent.get('/api/me/requests');
     expect(res.body.requests.map((r) => r.title)).toEqual(['Want a desk']);
@@ -114,7 +114,7 @@ describe('DELETE /api/me', () => {
   it('leaves other users\' data intact', async () => {
     const me = await registerVerifiedUser();
     const other = await registerVerifiedUser();
-    const otherItemId = (await other.agent.post('/api/items').send({ title: 'Their Bike', category: 'bikes', price: 80 })).body.id;
+    const otherItemId = (await other.agent.post('/api/items').send({ title: 'Their Bike', category: 'electronics', price: 80 })).body.id;
 
     await me.agent.delete('/api/me').send({ password: me.password }).expect(200);
 

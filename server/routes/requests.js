@@ -9,9 +9,10 @@ const asyncH = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).c
 // Per-IP cap on posting buy requests, to blunt scripted spam.
 const createRequestLimit = rateLimit({ name: 'create_request', limit: 30, windowMs: 60 * 60 * 1000 });
 
+// Must stay in sync with src/lib/categories.js and the CHECK in migration 006.
 const CATEGORIES = new Set([
-  'furniture', 'electronics', 'bikes', 'photo', 'music',
-  'clothing', 'books', 'home', 'sports', 'toys', 'other',
+  'furniture', 'kitchen', 'electronics', 'home',
+  'books', 'clothing', 'free', 'other',
 ]);
 
 // GET /api/requests — public demand feed; optional ?category= filter.
